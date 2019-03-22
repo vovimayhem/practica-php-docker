@@ -28,6 +28,9 @@ services:
       args:
       - DEVELOPER_UID=${UID:-1000}
       - DEVELOPER_USER=${USER:-you}
+    ports:
+    - ${DEMO_WEB_PORT:-8000}:8000
+    command: php artisan serve --host=0.0.0.0 --port=8000
     # Start mysql before starting this service:
     depends_on:
     - mysql
