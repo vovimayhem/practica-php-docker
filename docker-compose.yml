@@ -21,7 +21,7 @@ services:
       MYSQL_USER: demo
       MYSQL_PASSWORD: 3x4mpl3P455w0rd
 
-  web:
+  web: &app_base
     image: php-demo:development
     build:
       context: .
@@ -34,6 +34,7 @@ services:
     # Start mysql before starting this service:
     depends_on:
     - mysql
+    - webpack
     volumes:
     - .:/usr/src
     - app_node_modules:/usr/src/node_modules
@@ -61,3 +62,10 @@ services:
       DB_DATABASE: demo_development
 
       LOG_CHANNEL: stdout
+
+  webpack:
+    <<: *app_base
+    ports: []
+    depends_on: []
+    # We can also use 'watch-poll' for those running on VirtualBox...
+    command: yarn run ${MIX_WATCH_TASK:-watch}
