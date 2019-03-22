@@ -3,6 +3,8 @@ version: "2.4"
 
 volumes:
   mysql_data:
+  app_node_modules:
+  composer_vendor:
 
 services:
   mysql:
@@ -23,3 +25,20 @@ services:
     image: php-demo:development
     build:
       context: .
+      args:
+      - DEVELOPER_UID=${UID:-1000}
+      - DEVELOPER_USER=${USER:-you}
+    # Start mysql before starting this service:
+    depends_on:
+    - mysql
+    volumes:
+    - .:/usr/src
+    - app_node_modules:/usr/src/node_modules
+    - composer_vendor:/usr/src/vendor
+
+    # Keep the stdin open, so we can attach to our app container's process
+    # and do things such as byebug, etc:
+    stdin_open: true
+
+    # Enable sending signals (CTRL+C, CTRL+P + CTRL+Q) into the container:
+    tty: true
