@@ -1,0 +1,25 @@
+#
+version: "2.4"
+
+volumes:
+  mysql_data:
+
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+    # HOST PORT : CONTAINER PORT
+    - ${DEMO_MYSQL_PORT:-3306}:3306
+    volumes:
+    # SOURCE : DESTINATION (TARGET)
+    - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 3x4mpl3P455w0rd
+      MYSQL_DATABASE: demo_development
+      MYSQL_USER: demo
+      MYSQL_PASSWORD: 3x4mpl3P455w0rd
+
+  web:
+    image: php-demo:development
+    build:
+      context: .
