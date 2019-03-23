@@ -30,7 +30,10 @@ services:
       - DEVELOPER_USER=${USER:-you}
     ports:
     - ${DEMO_WEB_PORT:-8000}:8000
+
+    entrypoint: /usr/src/bin/dev-entrypoint.sh
     command: php artisan serve --host=0.0.0.0 --port=8000
+
     # Start mysql before starting this service:
     depends_on:
     - mysql
