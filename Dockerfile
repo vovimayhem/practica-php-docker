@@ -71,3 +71,52 @@ ENV DEVELOPER_USER=$DEVELOPER_USER
 RUN mkdir -p $COMPOSER_HOME \
  && chgrp wheel $COMPOSER_HOME \
  && chmod g+rws $COMPOSER_HOME
+
+# BUILDER: ==========================================================
+
+FROM development AS builder
+
+# COPY composer.* package.json yarn.lock database /usr/src/
+COPY . /usr/src/
+
+RUN mkdir -p /usr/src/vendor \
+ && composer install \
+    --ignore-platform-reqs \
+    --no-interaction \
+    --no-plugins \
+    --no-scripts \
+    --prefer-dist
+
+RUN mkdir -p /usr/src/node_modules && yarn install
+## =====================================================
+RUN yarn production && rm -rf resources/js resources/sass
+
+RUN composer install --optimize-autoloader --no-dev
+
+RUN rm -rf  \
+  .config \
+  .env.example \
+  .npm \
+  .npmrc \
+  bin/dev-entrypoint.sh \
+  node_modules \
+  tests \
+  tmp/* \
+  webpack.mix.js \
+  yarn.lock
+
+# RELEASE ==============================================
+FROM runtime AS release
+
+COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+
+COPY --from=builder --chown=www-data:www-data /usr/src /usr/src
+
+ENV APP_ENV=production PORT=8000
+
+RUN su-exec www-data mkdir -p /usr/src/tmp/pids /usr/src/tmp/sockets
+
+ENTRYPOINT [ "/usr/src/bin/entrypoint.sh" ]
+
+CMD [ "web" ]
