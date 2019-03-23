@@ -25,6 +25,7 @@ services:
     image: php-demo:development
     build:
       context: .
+      target: development
       args:
       - DEVELOPER_UID=${UID:-1000}
       - DEVELOPER_USER=${USER:-you}

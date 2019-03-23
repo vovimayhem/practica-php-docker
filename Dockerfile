@@ -1,5 +1,5 @@
 # Runtime: ===========================================
-FROM php:7.3-fpm-alpine
+FROM php:7.3-fpm-alpine AS runtime
 
 WORKDIR /usr/src
 
@@ -18,7 +18,10 @@ RUN apk add --no-cache \
   su-exec \
   tzdata \
   zlib
+
 #  Development: ===========================================
+FROM runtime AS development
+
 RUN apk add --no-cache \
   build-base \
   chromium \
