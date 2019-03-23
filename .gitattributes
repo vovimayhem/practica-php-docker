@@ -1,0 +1,8 @@
+* text=auto
+*.css linguist-vendored
+*.scss linguist-vendored
+*.js linguist-vendored
+CHANGELOG.md export-ignore
+
+# Preserve line endings on shell files:
+/bin/dev-entrypoint.sh eol=lf
