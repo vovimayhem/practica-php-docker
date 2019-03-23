@@ -21,23 +21,20 @@ services:
       MYSQL_PASSWORD: 3x4mpl3P455w0rd
       MYSQL_ROOT_PASSWORD: 3x4mpl3P455w0rd
 
-  web: &app_base
+  test: &app_base
     image: php-demo:development
     build:
       context: .
       args:
       - DEVELOPER_UID=${UID:-1000}
       - DEVELOPER_USER=${USER:-you}
-    ports:
-    - ${DEMO_WEB_PORT:-8000}:8000
 
     entrypoint: /usr/src/bin/dev-entrypoint.sh
-    command: php artisan serve --host=0.0.0.0 --port=8000
+    command: phpunit-watcher watch
 
     # Start mysql before starting this service:
     depends_on:
     - mysql
-    - webpack
     volumes:
     - .:/usr/src
     - app_node_modules:/usr/src/node_modules
@@ -50,8 +47,8 @@ services:
     # Enable sending signals (CTRL+C, CTRL+P + CTRL+Q) into the container:
     tty: true
 
-    environment:
-      APP_ENV: development
+    environment: &app_env
+      APP_ENV: test
       APP_DEBUG: 'true'
       APP_LOG_LEVEL: debug
       APP_URL: http://localhost:8000
@@ -62,13 +59,25 @@ services:
       DB_HOST: mysql
       DB_USERNAME: demo
       DB_PASSWORD: 3x4mpl3P455w0rd
-      DB_DATABASE: demo_development
+      DB_DATABASE: demo_test
 
       LOG_CHANNEL: stdout
 
+  web:
+    <<: *app_base
+    ports:
+    - ${DEMO_WEB_PORT:-8000}:8000
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    depends_on:
+    - mysql
+    - webpack
+    environment:
+      <<: *app_env
+      APP_ENV: development
+      DB_DATABASE: demo_development
+
   webpack:
     <<: *app_base
-    ports: []
     depends_on: []
     # We can also use 'watch-poll' for those running on VirtualBox...
     command: yarn run ${MIX_WATCH_TASK:-watch}
