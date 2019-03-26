@@ -50,7 +50,7 @@ then
   # We'll use a custom script `checkdb` (inside our app's `bin` folder), instead
   # of running `rails db:version` to avoid loading the entire rails app for this
   # simple check:
-  php artisan migrate
+  php artisan migrate || php artisan db:create && php artisan migrate
 
   # 8: 'Unlock' the setup process:
   unlock_setup
